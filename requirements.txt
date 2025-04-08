@@ -1,0 +1,8 @@
+matplotlib==3.9.3
+networkx==3.4.2
+numpy==1.26.4
+pandas==2.2.3
+geopandas==0.14.4
+gerrychain==0.3.2
+maup==2.0.2
+ipykernel==6.29.5
