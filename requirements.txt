@@ -6,3 +6,4 @@ geopandas==0.14.4
 gerrychain==0.3.2
 maup==2.0.2
 ipykernel==6.29.5
+pyei
