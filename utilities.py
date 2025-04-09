@@ -90,7 +90,11 @@ def checkpoint(checkpoint_name: str, data):
         print("Saving data...")
 
         with open(pickle_path, 'wb') as file:
-            pickle.dump(data, file)
+            if isinstance(data, Partition):
+                # Save only the assignment dictionary
+                pickle.dump(data.assignment, file)
+            else:
+                pickle.dump(data, file)
         print(f"Data saved successfully to {pickle_path}.")
         return_file = data
         pass
@@ -184,19 +188,13 @@ def render_oregon_partition(gdf: GeoDataFrame, partition: Partition, title: str,
     gdf["color"] = gdf["district"].map(color_map)
 
     # Plot map
-    ax = gdf.plot(color=gdf["color"], figsize=(12, 12), legend=False)
-
-    # Add labels instead of dots
-    for _, row in gdf_dissolved.iterrows():
-        centroid = row["geometry"].centroid
-        label = f"D{row['district']}"  # or use a custom name if you have one
-        ax.text(centroid.x, centroid.y, label, color='white', fontsize=12, ha='center', va='center', weight='bold')
+    gdf.plot(color=gdf["color"], figsize=(12, 12), legend=False)
 
     # Final touches
     plt.axis("off")
     plt.title(title, fontsize=20)
     plt.tight_layout()
-    plt.savefig(f"images/oregon_map_{title}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"images/oregon_map_{title}.svg", bbox_inches="tight")
     if show:
         plt.show()
     plt.close()
