@@ -74,7 +74,7 @@ def checkpoint(checkpoint_name: str, data):
         os.makedirs(checkpoint_dir)
 
     # save or load data if pickle file exists
-    pickle_path = f"${checkpoint_dir}/{checkpoint_name}.pkl"
+    pickle_path = f"{checkpoint_dir}/{checkpoint_name}.pkl"
 
     # Check if the data is already cached
     existing_data = load_cached_data(pickle_path)
