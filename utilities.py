@@ -3,6 +3,9 @@ import geopandas as gpd
 import os
 
 import maup
+import pandas as pd
+from geopandas import GeoDataFrame
+from gerrychain import Partition
 from matplotlib import pyplot as plt
 
 
@@ -150,5 +153,5 @@ def render_oregon(gdf: gpd.GeoDataFrame, title: str):
     plt.title(title, fontsize=82)
     plt.tight_layout()
     plt.show()
-    plt.savefig(f"oregon_map_{title}.png", dpi=600, bbox_inches="tight")
+    plt.savefig(f"images/oregon_map_{title}.png", dpi=600, bbox_inches="tight")
     pass
