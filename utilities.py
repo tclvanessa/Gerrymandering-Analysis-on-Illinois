@@ -3,6 +3,7 @@ import geopandas as gpd
 import os
 
 import maup
+from matplotlib import pyplot as plt
 
 
 # Setup for pickle
@@ -118,4 +119,36 @@ def assign_population_data_to(
         df[name] = population_df[name].groupby(blocks_to_precincts_assignment).sum()
     for name in vap_column_names:
         df[name] = vap_df[name].groupby(vap_blocks_to_precincts_assignment).sum()
+    pass
+
+
+def render_oregon(gdf: gpd.GeoDataFrame, title: str):
+
+    # Dissolve geometries by SEND so each district is represented once
+    gdf_dissolved = gdf.dissolve(by="SEND", as_index=False)
+
+    # Generate N distinct colors
+    def get_n_colors(n):
+        colors = plt.cm.get_cmap('hsv', n)
+        return [colors(i) for i in range(n)]
+
+    # Generate unique colors for each SEND
+    districts = gdf_dissolved["SEND"].unique()
+    color_list = get_n_colors(len(districts))
+    color_map = {district: color_list[i] for i, district in enumerate(districts)}
+
+    # Map colors back to original gdf
+    gdf["color"] = gdf["SEND"].map(color_map)
+
+    # Plot original geometries
+    ax = gdf.plot(color=gdf["color"], figsize=(100, 100), legend=True)
+
+    # Plot one dot at the centroid of each dissolved (unique) SEND geometry
+    gdf_dissolved["geometry"].centroid.plot(ax=ax, color="white", markersize=50)
+
+    plt.axis("off")
+    plt.title(title, fontsize=82)
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(f"oregon_map_{title}.png", dpi=600, bbox_inches="tight")
     pass
