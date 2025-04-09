@@ -144,7 +144,7 @@ def render_oregon(gdf: gpd.GeoDataFrame, title: str):
     gdf["color"] = gdf["SEND"].map(color_map)
 
     # Plot original geometries
-    ax = gdf.plot(color=gdf["color"], figsize=(100, 100), legend=True)
+    ax = gdf.plot(color=gdf["color"], figsize=(20, 20), legend=True)
 
     # Plot one dot at the centroid of each dissolved (unique) SEND geometry
     gdf_dissolved["geometry"].centroid.plot(ax=ax, color="white", markersize=50)
@@ -152,6 +152,51 @@ def render_oregon(gdf: gpd.GeoDataFrame, title: str):
     plt.axis("off")
     plt.title(title, fontsize=82)
     plt.tight_layout()
+    plt.savefig(f"images/oregon_map_{title}.png", dpi=300, bbox_inches="tight")
     plt.show()
-    plt.savefig(f"images/oregon_map_{title}.png", dpi=600, bbox_inches="tight")
     pass
+
+
+import matplotlib.pyplot as plt
+import os
+from gerrychain import Partition
+from geopandas import GeoDataFrame
+
+def render_oregon_partition(gdf: GeoDataFrame, partition: Partition, title: str, show: bool = True):
+    # Create output directory if not exists
+    os.makedirs("images", exist_ok=True)
+
+    # Assign districts from partition
+    gdf["district"] = gdf.index.map(partition.assignment)
+
+    # Dissolve to get single geometry per district
+    gdf_dissolved = gdf.dissolve(by="district", as_index=False)
+
+    # Generate N distinct colors
+    def get_n_colors(n):
+        cmap = plt.colormaps.get_cmap('hsv')
+        return [cmap(i / n) for i in range(n)]  # evenly spaced in [0, 1]
+
+    # Map districts to colors
+    districts = gdf_dissolved["district"].unique()
+    color_list = get_n_colors(len(districts))
+    color_map = {district: color_list[i] for i, district in enumerate(districts)}
+    gdf["color"] = gdf["district"].map(color_map)
+
+    # Plot map
+    ax = gdf.plot(color=gdf["color"], figsize=(12, 12), legend=False)
+
+    # Add labels instead of dots
+    for _, row in gdf_dissolved.iterrows():
+        centroid = row["geometry"].centroid
+        label = f"D{row['district']}"  # or use a custom name if you have one
+        ax.text(centroid.x, centroid.y, label, color='white', fontsize=12, ha='center', va='center', weight='bold')
+
+    # Final touches
+    plt.axis("off")
+    plt.title(title, fontsize=20)
+    plt.tight_layout()
+    plt.savefig(f"images/oregon_map_{title}.png", dpi=300, bbox_inches="tight")
+    if show:
+        plt.show()
+    plt.close()
