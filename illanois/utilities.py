@@ -5,7 +5,7 @@ import os
 import maup
 import pandas as pd
 from geopandas import GeoDataFrame
-from gerrychain import Partition
+from gerrychain import Partition, Graph
 from matplotlib import pyplot as plt
 
 
@@ -51,6 +51,41 @@ def load_shapefile(path) -> gpd.GeoDataFrame:
     else:
         print("Loading shapefile...")
         shapefile = gpd.read_file(path)
+
+        # Save the loaded data
+        save_cached_data(shapefile, pickle_path)
+
+        print(f"Shapefile data saved successfully to {pickle_path}.")
+        return_file = shapefile
+        pass
+
+    return return_file
+
+def load_graph(path) -> Graph:
+    """
+    Loads a shapefile and saves graph result.
+
+    :param path: Path to the shapefile
+    :return: The loaded shapefile Graph
+    """
+
+    print(f"Loading shapefile graph from {path}...")
+
+    # set up the path for the cached data
+    pickle_path = path + '.graph.pkl'
+
+    # Check if the data is already cached
+    existing_data = load_cached_data(pickle_path)
+
+    return_file: Graph
+
+    if existing_data is not None:
+        print(f"Shapefile data loaded from cache.")
+        return_file = existing_data
+        pass
+    else:
+        print("Loading shapefile...")
+        shapefile = Graph.from_file(path)
 
         # Save the loaded data
         save_cached_data(shapefile, pickle_path)
