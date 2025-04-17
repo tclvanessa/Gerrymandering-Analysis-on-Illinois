@@ -128,10 +128,11 @@ def checkpoint(checkpoint_name: str, data):
             if isinstance(data, Partition):
                 # Save only the assignment dictionary
                 pickle.dump(data.assignment, file)
+                return_file = data.assignment
             else:
                 pickle.dump(data, file)
+                return_file = data
         print(f"Data saved successfully to {pickle_path}.")
-        return_file = data
         pass
 
     return return_file
